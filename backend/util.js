@@ -4,7 +4,7 @@
  * @param {number} max - The maximum value
  * @returns {number} A random number between min and max
  */
-export function getRandomInRange(min, max) {
+module.exports.getRandomInRange = (min, max) => {
   min = Math.ceil(min)
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -15,6 +15,6 @@ export function getRandomInRange(min, max) {
  * @param {number} seconds - The number of seconds to wait
  * @returns {Promise} A promise that resolves after the specified delay
  */
-export function wait(seconds) {
+module.exports.wait = (seconds) => {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
 }
