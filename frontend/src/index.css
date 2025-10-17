@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+button {
+  @apply cursor-pointer;
+
+  &:hover {
+    @apply opacity-70
+  }
+  &:focus {
+    @apply border border-1 border-dotted
+  }
+}
+table thead  tr th{
+  position: sticky !important;
+  top: 0; 
+  z-index: 10000;
+  @apply bg-gray-50
+}
