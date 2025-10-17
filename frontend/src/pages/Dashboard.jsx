@@ -125,7 +125,7 @@ const Dashboard = () => {
                 </td>
               </tr>
             ))}
-            {filteredQueues.length<1?(<tr><td>Empty</td></tr>):""}
+            {filteredQueues.length<1?(<tr><td colSpan={9} className="text-center p-2 text-gray-300" >Empty</td></tr>):""}
           </tbody>
         </table>
       </div>
