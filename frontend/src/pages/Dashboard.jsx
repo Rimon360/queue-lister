@@ -35,7 +35,7 @@ const Dashboard = () => {
           await wait(getRandomInRange(0.1, 0.5))
         }
 
-        let v = getRandomInRange(20, 30)
+        let v = getRandomInRange(55, 60)
         setRefreshTime(v)
         console.log("refreshing in: ", v, "s")
 
@@ -81,7 +81,6 @@ const Dashboard = () => {
               clipRule="evenodd"
             />
           </svg>
-          
           Refreshing in {refreshTime}s
         </button>
       </div>
