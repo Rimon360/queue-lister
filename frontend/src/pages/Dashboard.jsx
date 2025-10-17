@@ -8,13 +8,6 @@ const Dashboard = () => {
   const [queues, setQueues] = useState([])
   const [filteredQueues, setFilteredQueues] = useState([])
 
-  useEffect(() => {
-    ;(async () => {
-      let result = await axios.get(BACKEND_URL + "/queue/get")
-      setFilteredQueues(result.data)
-      setQueues(result.data)
-    })()
-  }, [])
   const [isRefresh, setIsRefresh] = useState(Date.now())
   const [refreshTime, setRefreshTime] = useState(0)
   useEffect(() => {
@@ -23,22 +16,8 @@ const Dashboard = () => {
         let result = await axios.get(BACKEND_URL + "/queue/get")
         let queues = result.data
         setFilteredQueues(queues)
-        for (const queue of queues) {
-          let result = await axios.post(BACKEND_URL + "/queue/status", { req_url: queue.req_url }, { headers: { "Content-Type": "application/json" } })
-          setFilteredQueues((prev) => {
-            let id = prev.findIndex((q) => q.req_url === result.data[0].req_url)
-            if (id === -1) return prev
-            const newArr = [...prev]
-            newArr[id] = result.data[0]
-            return newArr
-          })
-          await wait(getRandomInRange(0.1, 0.5))
-        }
-
-        let v = getRandomInRange(55, 60)
-        setRefreshTime(v)
-        console.log("refreshing in: ", v, "s")
-
+        let v = getRandomInRange(15, 30)
+        setRefreshTime(v) 
         await wait(v)
       }
     })()
@@ -47,7 +26,7 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("")
   // Handle search functionality
   useEffect(() => {
-    let result = queues.length > 0 ? queues?.filter((queue) => queue.id.toLowerCase().includes(searchTerm.toLowerCase()) || queue.redirectUrl.toLowerCase().includes(searchTerm.toLowerCase())) : []
+    let result = queues.length > 0 ? queues?.filter((queue) => queue._id.toLowerCase().includes(searchTerm.toLowerCase()) || queue.redirectUrl.toLowerCase().includes(searchTerm.toLowerCase())) : []
     setFilteredQueues(result)
   }, [searchTerm])
 
@@ -56,13 +35,10 @@ const Dashboard = () => {
   const [copyText, setCopyText] = useState("Copy")
 
   const handleDelete = async (id) => {
-    if (1) {
-      console.log(id)
-
+    if (1) { 
       let result = await axios.post(BACKEND_URL + "/queue/delete/" + id)
       if (result.data.success) {
-        let filtered = queues.length > 0 ? queues?.filter((queue) => queue.id !== id) : []
-        console.log(filtered)
+        let filtered = queues.length > 0 ? queues?.filter((queue) => queue._id !== id) : [] 
         setQueues(filtered)
         setFilteredQueues(filtered)
       }
@@ -112,7 +88,7 @@ const Dashboard = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 text-left">
             {filteredQueues.map((queue) => (
-              <tr key={queue.id} className="hover:bg-gray-50">
+              <tr key={queue._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex gap-1 items-center ">
                     {!queue.redirectUrl ? (
@@ -140,7 +116,7 @@ const Dashboard = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-yellow-500">
                   <button
                     onClick={(e) => {
-                      handleDelete(queue.id)
+                      handleDelete(queue._id)
                     }}
                     className="bg-red-300/50 px-2 mb-1 text-red-500 rounded-md"
                   >
@@ -149,6 +125,7 @@ const Dashboard = () => {
                 </td>
               </tr>
             ))}
+            {filteredQueues.length<1?(<tr><td>Empty</td></tr>):""}
           </tbody>
         </table>
       </div>

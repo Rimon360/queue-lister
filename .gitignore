@@ -19,6 +19,8 @@ backend/*.njsproj
 backend/*.sln
 backend/*.sw?
 
+doc.md
+
 fontend/logs
 fontend/*.log
 fontend/npm-debug.log*

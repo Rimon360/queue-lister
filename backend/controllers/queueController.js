@@ -32,18 +32,7 @@ module.exports.get = async (req, res) => {
     if (queues.length > 0) {
       let queueInfo = []
       for (const queue of queues) {
-        queueInfo.push({
-          id: queue._id,
-          req_url: queue.req_url,
-          forecastStatus: null,
-          progress: queue.progress,
-          whichIsIn: null,
-          expectedServiceTime: null,
-          lastUpdatedUTC: null,
-          redirectUrl: queue.redirectUrl,
-          added_date: queue.createdAt,
-          error: false,
-        })
+        queueInfo.push(queue)
       }
       return res.status(200).json(queueInfo)
     } else {
@@ -63,7 +52,7 @@ module.exports.status = async (req, res) => {
     res.status(403).json([])
   }
   let queueInfo = []
-  const queue = await queueModel.findOne({ req_url }).sort({ progress: 1 }).lean()
+  let queue = await queueModel.findOne({ req_url }).sort({ progress: 1 }).lean()
 
   try {
     let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json" } })
@@ -73,53 +62,51 @@ module.exports.status = async (req, res) => {
     if (result.redirectUrl) {
       if (result.redirectUrl.includes("/error?er")) {
         await queueModel.deleteMany({ req_url: queue.req_url })
-        queue.req_url = 'Expired';
-        queue.forecastStatus = 'Expired'; 
+        queue.req_url = "Expired"
+        queue.forecastStatus = "Expired"
         return res.status(200).json([queue])
       }
-      await queueModel.updateMany({ req_url: queue.req_url }, { $set: { redirectUrl: result.redirectUrl } })
-      queueInfo.push({
-        id: queue._id,
-        req_url: queue.req_url,
-        forecastStatus: "Completed",
-        progress: null,
-        whichIsIn: null,
-        expectedServiceTime: null,
-        lastUpdatedUTC: null,
-        redirectUrl: result.redirectUrl,
-        added_date: queue.createdAt,
-        error: false,
-      })
+
+      await queueModel.updateMany(
+        { req_url: queue.req_url },
+        {
+          $set: {
+            req_url: queue.req_url,
+            forecastStatus: "Completed",
+            progress: null,
+            whichIsIn: null,
+            expectedServiceTime: null,
+            lastUpdatedUTC: null,
+            redirectUrl: result.redirectUrl,
+            added_date: queue.createdAt,
+            error: false,
+          },
+        }
+      )
+      queue = await queueModel.findOne({ req_url }).sort({ progress: 1 })
+      queueInfo.push(queue)
     } else if (ticket) {
-      await queueModel.updateMany({ req_url: queue.req_url }, { $set: { progress: ticket.progress } })
-      queueInfo.push({
-        id: queue._id,
-        req_url: queue.req_url,
-        forecastStatus: result.forecastStatus,
-        progress: ticket.progress,
-        whichIsIn: ticket.whichIsIn,
-        expectedServiceTime: ticket.expectedServiceTime,
-        lastUpdatedUTC: ticket.lastUpdatedUTC,
-        redirectUrl: null,
-        added_date: queue.createdAt,
-        error: false,
-      })
+      await queueModel.updateMany(
+        { req_url: queue.req_url },
+        {
+          $set: {
+            req_url: queue.req_url,
+            forecastStatus: result.forecastStatus,
+            progress: ticket.progress,
+            whichIsIn: ticket.whichIsIn,
+            expectedServiceTime: ticket.expectedServiceTime,
+            lastUpdatedUTC: ticket.lastUpdatedUTC,
+            redirectUrl: null,
+            added_date: queue.createdAt,
+            error: false,
+          },
+        }
+      )
+      queue = await queueModel.findOne({ req_url }).sort({ progress: 1 })
+      queueInfo.push(queue)
     }
   } catch (error) {
-    console.log(error);
-    
-    queueInfo.push({
-      id: queue._id,
-      req_url: queue.req_url,
-      forecastStatus: "Expired",
-      progress: null,
-      whichIsIn: null,
-      expectedServiceTime: null,
-      lastUpdatedUTC: null,
-      redirectUrl: null,
-      added_date: queue.createdAt,
-      error: true,
-    })
+    return res.status(200).json([])
   }
 
   res.status(200).json(queueInfo)
