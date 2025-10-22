@@ -1,6 +1,7 @@
 const queueModel = require("../models/queueModel")
 const { wait, getRandomInRange } = require("../util")
 
+const MAX_LIMIT = 600 // urls
 module.exports.add = async (req, res) => {
   const { req_url, req_body } = req.body
   //   const ifExists = await queueModel.find({ req_url })
@@ -10,20 +11,32 @@ module.exports.add = async (req, res) => {
   //       error: true,
   //     })
   //   }
-  const queue = await queueModel.create({
-    req_url,
-    req_body,
-  })
-  if (queue) {
-    res.status(200).json({
-      message: "Queue created successfully",
+  try {
+    const result = await queueModel.find()
+    if (result.length > MAX_LIMIT) {
+      res.status(200).json({ message: "waiting period..." })
+      return
+    }
+    const queue = await queueModel.create({
+      req_url,
+      req_body,
     })
-    return
+    if (queue) {
+      res.status(200).json({
+        message: "Queue created successfully",
+      })
+      return
+    }
+    res.status(503).json({
+      message: "Server error, unable to add",
+      error: true,
+    })
+  } catch (error) {
+    res.status(503).json({
+      message: "Server error, unable to add",
+      error: true,
+    })
   }
-  res.status(503).json({
-    message: "Server error, unable to add",
-    error: true,
-  })
 }
 
 module.exports.get = async (req, res) => {
