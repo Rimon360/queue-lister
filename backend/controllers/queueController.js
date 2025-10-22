@@ -1,7 +1,7 @@
 const queueModel = require("../models/queueModel")
 const { wait, getRandomInRange } = require("../util")
 
-const MAX_LIMIT = 600 // urls
+const MAX_LIMIT = 1000 // urls
 module.exports.add = async (req, res) => {
   const { req_url, req_body } = req.body
   //   const ifExists = await queueModel.find({ req_url })
