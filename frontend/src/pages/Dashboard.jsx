@@ -7,6 +7,7 @@ const Dashboard = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"
   const [queues, setQueues] = useState([])
   const [filteredQueues, setFilteredQueues] = useState([])
+  const [totalCount, setTotalCount] = useState(0)
 
   const [isRefresh, setIsRefresh] = useState(Date.now())
   const [refreshTime, setRefreshTime] = useState(0)
@@ -15,9 +16,10 @@ const Dashboard = () => {
       while (true) {
         let result = await axios.get(BACKEND_URL + "/queue/get")
         let queues = result.data
+        setTotalCount(queues.length)
         setFilteredQueues(queues)
-        let v = getRandomInRange(15, 30)
-        setRefreshTime(v) 
+        let v = getRandomInRange(5, 10)
+        setRefreshTime(v)
         await wait(v)
       }
     })()
@@ -35,10 +37,10 @@ const Dashboard = () => {
   const [copyText, setCopyText] = useState("Copy")
 
   const handleDelete = async (id) => {
-    if (1) { 
+    if (1) {
       let result = await axios.post(BACKEND_URL + "/queue/delete/" + id)
       if (result.data.success) {
-        let filtered = queues.length > 0 ? queues?.filter((queue) => queue._id !== id) : [] 
+        let filtered = queues.length > 0 ? queues?.filter((queue) => queue._id !== id) : []
         setQueues(filtered)
         setFilteredQueues(filtered)
       }
@@ -72,6 +74,7 @@ const Dashboard = () => {
       </div>
 
       <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <h1 className="font-bold p-2">Total count: {totalCount}</h1>
         <table className="min-w-full table-auto">
           <thead className="bg-gray-50">
             <tr>
@@ -125,7 +128,15 @@ const Dashboard = () => {
                 </td>
               </tr>
             ))}
-            {filteredQueues.length<1?(<tr><td colSpan={9} className="text-center p-2 text-gray-300" >Empty</td></tr>):""}
+            {filteredQueues.length < 1 ? (
+              <tr>
+                <td colSpan={9} className="text-center p-2 text-gray-300">
+                  Empty
+                </td>
+              </tr>
+            ) : (
+              ""
+            )}
           </tbody>
         </table>
       </div>
