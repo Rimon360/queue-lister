@@ -18,7 +18,7 @@ const Dashboard = () => {
         let queues = result.data
         setTotalCount(queues.length)
         setFilteredQueues(queues)
-        let v = getRandomInRange(10)
+        let v = getRandomInRange(10,10)
         setRefreshTime(v)
         await wait(v)
       }
