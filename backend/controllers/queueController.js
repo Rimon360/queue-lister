@@ -41,7 +41,7 @@ module.exports.add = async (req, res) => {
 
 module.exports.get = async (req, res) => {
   try {
-    const queues = await queueModel.find().sort({ redirectUrl: 1 })
+    const queues = await queueModel.find().sort({ redirectUrl: -1 })
     if (queues.length > 0) {
       let queueInfo = []
       for (const queue of queues) {
