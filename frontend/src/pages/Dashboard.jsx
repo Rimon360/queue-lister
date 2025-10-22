@@ -78,21 +78,21 @@ const Dashboard = () => {
         <table className="min-w-full table-auto">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Redirect Url</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added at</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">forecast Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Left</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">expected Service Time</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">last Updated UTC</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">progress</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delete</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Redirect Url</th> 
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Left</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Time</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">last Updated</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">progress</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added Time</th>
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delete</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 text-left">
             {filteredQueues.map((queue) => (
               <tr key={queue._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-1 whitespace-nowrap">
                   <div className="flex gap-1 items-center ">
                     {!queue.redirectUrl ? (
                       ""
@@ -101,27 +101,27 @@ const Dashboard = () => {
                         onClick={() => {
                           window.navigator.clipboard.writeText(queue.redirectUrl)
                         }}
-                        className="bg-green-300/50 px-4 mb-1 text-green-500 rounded-md"
+                        className="bg-green-900/50 px-4 mb-1 hover:bg-black hover:text-white text-green-400 rounded-md"
                       >
                         {copyText || "Copy"}
                       </button>
                     )}
-                    <p className="max-w-[300px] overflow-hidden text-ellipsis bg-blue-300/50 px-2 text-blue-500 rounded-md text-sm">{queue.redirectUrl || "Pending..."}</p>
+                    <p className="max-w-[300px] overflow-hidden text-ellipsis bg-blue-900/50 px-2 text-blue-500 rounded-md text-sm">{queue.redirectUrl || "Pending..."}</p>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-green-400">{queue.added_date || "-"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-green-400">{queue.forecastStatus || "-"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-yellow-500">{queue.whichIsIn || "-"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-yellow-500">{queue.expectedServiceTime || "-"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-yellow-500">{queue.lastUpdatedUTC || "-"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-yellow-500">{parseFloat(queue.progress || 0) * 100 + "%" || "-"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-yellow-500">{queue.Error || "-"}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-yellow-500">
+                <td className="px-2 py-1 whitespace-nowrap text-green-400">{queue.forecastStatus || "-"}</td>
+                <td className="px-2 py-1 whitespace-nowrap text-yellow-500">{queue.whichIsIn || "-"}</td>
+                <td className="px-2 py-1 whitespace-nowrap text-yellow-500">{queue.expectedServiceTime || "-"}</td>
+                <td className="px-2 py-1 whitespace-nowrap text-yellow-500">{queue.lastUpdatedUTC || "-"}</td>
+                <td className="px-2 py-1 whitespace-nowrap text-yellow-500">{parseFloat(queue.progress || 0) * 100 + "%" || "-"}</td>
+                <td className="px-2 py-1 whitespace-nowrap text-yellow-500">{queue.Error || "-"}</td>
+                <td className="px-2 py-1 whitespace-nowrap text-yellow-500">{queue.createdAt || "-"}</td>
+                <td className="px-2 py-1 whitespace-nowrap text-yellow-500">
                   <button
                     onClick={(e) => {
                       handleDelete(queue._id)
                     }}
-                    className="bg-red-300/50 px-2 mb-1 text-red-500 rounded-md"
+                    className="bg-red-900/50 px-2 mb-1 text-red-500 rounded-md"
                   >
                     Del
                   </button>

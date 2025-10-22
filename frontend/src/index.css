@@ -6,13 +6,23 @@ button {
   &:hover {
     @apply opacity-70
   }
+
   &:focus {
     @apply border border-1 border-dotted
   }
 }
-table thead  tr th{
+
+table thead tr th {
   position: sticky !important;
-  top: 0; 
+  top: 0;
   z-index: 10000;
-  @apply bg-gray-50
+  @apply bg-gray-950 text-red-500
+}
+
+table tr:nth-child(odd) {
+  @apply !bg-gray-900
+}
+
+table  tr:nth-child(even) {
+  @apply !bg-gray-950
 }

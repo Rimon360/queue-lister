@@ -63,10 +63,17 @@ module.exports.status = async (req, res) => {
   const { req_url } = req.body || { req_url: null }
   if (!req_url) {
     res.status(403).json([])
+    return
   }
   let queueInfo = []
   let queue = await queueModel.findOne({ req_url }).sort({ progress: 1 }).lean()
-
+  let addedTime = +new Date(queue.createdAt)
+  let timeSpent = Date.now() - addedTime
+  let maxTimeAllowcate = 30 * 60 * 1000 // 30 minute;
+  if (queue.forecastStatus.toLowerCase() == "FirstInLine".toLowerCase() && timeSpent >= maxTimeAllowcate) {
+    await queueModel.deleteOne({ req_url })
+    return res.status(200).json([])
+  }
   try {
     let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json" } })
     result = await result.json()
