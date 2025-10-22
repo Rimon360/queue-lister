@@ -12,6 +12,14 @@ button {
   }
 }
 
+body {
+  @apply !bg-gray-900
+}
+
+input {
+  @apply !bg-gray-950 text-white;
+}
+
 table thead tr th {
   position: sticky !important;
   top: 0;
@@ -23,6 +31,6 @@ table tr:nth-child(odd) {
   @apply !bg-gray-900
 }
 
-table  tr:nth-child(even) {
+table tr:nth-child(even) {
   @apply !bg-gray-950
 }

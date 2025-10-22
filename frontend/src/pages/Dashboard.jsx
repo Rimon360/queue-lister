@@ -50,7 +50,7 @@ const Dashboard = () => {
   return (
     <div className="p-6 max-w-fit mx-auto">
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Queue Dashboard</h1>
+        <h1 className="text-2xl font-bold text-blue-800">Queue Dashboard</h1>
         <button onClick={(e) => location.reload()} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path
@@ -63,7 +63,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <input
           type="text"
           placeholder="Search queues..."
@@ -71,7 +71,7 @@ const Dashboard = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </div>
+      </div> */}
 
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <h1 className="font-bold p-2">Total count: {totalCount}</h1>
