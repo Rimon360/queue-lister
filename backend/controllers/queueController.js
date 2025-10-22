@@ -69,7 +69,7 @@ module.exports.status = async (req, res) => {
   let queue = await queueModel.findOne({ req_url }).sort({ progress: 1 }).lean()
   let addedTime = +new Date(queue.createdAt)
   let timeSpent = Date.now() - addedTime
-  let maxTimeAllowcate = 10 * 60 * 1000 // 10 minute;
+  let maxTimeAllowcate = 5 * 60 * 1000 // 10 minute;
   if (queue.forecastStatus.toLowerCase() == "FirstInLine".toLowerCase() && timeSpent >= maxTimeAllowcate) {
     await queueModel.deleteOne({ req_url })
     return res.status(200).json([])
