@@ -66,19 +66,24 @@ module.exports.status = async (req, res) => {
     return
   }
   let queueInfo = []
+  console.log('queueModel to call...');
   let queue = await queueModel.findOne({ req_url }).sort({ progress: 1 }).lean()
   let addedTime = +new Date(queue.createdAt)
   let timeSpent = Date.now() - addedTime
   let maxTimeAllowcate = 5 * 60 * 1000 // 10 minute;
+  console.log('maxTimeAllowcate to call...');
   if (queue.forecastStatus.toLowerCase() == "FirstInLine".toLowerCase() && timeSpent >= maxTimeAllowcate) {
     await queueModel.deleteOne({ req_url })
     return res.status(200).json([])
   }
   try {
+    console.log('going to call...');
+    
     let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json" } })
     result = await result.json()
     let ticket = result.ticket
-
+    console.log(result);
+    console.log('after to call...');
     if (result.redirectUrl) {
       if (result.redirectUrl.includes("/error?er")) {
         await queueModel.deleteMany({ req_url: queue.req_url })
@@ -126,6 +131,8 @@ module.exports.status = async (req, res) => {
       queueInfo.push(queue)
     }
   } catch (error) {
+    console.log(error);
+    
     return res.status(200).json([])
   }
 
