@@ -13,13 +13,17 @@ const Dashboard = () => {
   const [refreshTime, setRefreshTime] = useState(0)
   useEffect(() => {
     ;(async () => {
+      let int
       while (true) {
         let result = await axios.get(BACKEND_URL + "/queue/get")
         let queues = result.data
         setTotalCount(queues.length)
         setFilteredQueues(queues)
         let v = getRandomInRange(10, 10)
-        setRefreshTime(v)
+        clearInterval(int)
+        int = setInterval(() => {
+          setRefreshTime(v--)
+        }, 1000)
         await wait(v)
       }
     })()
@@ -94,19 +98,19 @@ const Dashboard = () => {
               <tr key={queue._id} className="hover:bg-gray-50">
                 <td className="px-6 py-1 whitespace-nowrap">
                   <div className="flex gap-1 items-center ">
-                    {!queue.redirectUrl ? (
+                    {!queue.redirectUrl && !queue.original_queue_url ? (
                       ""
                     ) : (
                       <button
                         onClick={() => {
-                          window.navigator.clipboard.writeText(queue.redirectUrl)
+                          window.navigator.clipboard.writeText(queue.redirectUrl || queue.original_queue_url)
                         }}
                         className="bg-green-900/50 px-4 mb-1 hover:bg-black hover:text-white text-green-400 rounded-md"
                       >
                         {copyText || "Copy"}
                       </button>
                     )}
-                    <p className="max-w-[300px] overflow-hidden text-ellipsis bg-blue-900/50 px-2 text-blue-500 rounded-md text-sm">{queue.redirectUrl || "Pending..."}</p>
+                    <p className="max-w-[300px] overflow-hidden text-ellipsis bg-blue-900/50 px-2 text-blue-500 rounded-md text-sm">{queue.redirectUrl || queue.original_queue_url || "Pending..."}</p>
                   </div>
                 </td>
                 <td className="px-2 py-1 whitespace-nowrap text-green-400">{queue.forecastStatus || "-"}</td>

@@ -3,7 +3,7 @@ const { wait, getRandomInRange } = require("../util")
 
 const MAX_LIMIT = 499 // urls
 module.exports.add = async (req, res) => {
-  const { req_url, req_body } = req.body
+  const { req_url, req_body, original_queue_url } = req.body
   //   const ifExists = await queueModel.find({ req_url })
   //   if (ifExists.length > 0) {
   //     return res.status(400).json({
@@ -20,6 +20,7 @@ module.exports.add = async (req, res) => {
     const queue = await queueModel.create({
       req_url,
       req_body,
+      original_queue_url,
     })
     if (queue) {
       res.status(200).json({

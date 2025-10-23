@@ -19,6 +19,7 @@ backend/*.njsproj
 backend/*.sln
 backend/*.sw?
 
+t.js
 doc.md
 chrome_extension
 

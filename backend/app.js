@@ -48,7 +48,7 @@ app.use(function (req, res, next) {
 })
 
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: "Not found" })
+  res.status(404).json({ message: "Route not exists" })
 })
 
 const port = process.env.PORT || 8000

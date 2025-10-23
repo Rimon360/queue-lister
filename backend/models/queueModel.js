@@ -2,6 +2,7 @@ const mongoese = require("mongoose")
 
 const queuelistSchema = new mongoese.Schema({
   req_url: { type: String },
+  original_queue_url: { type: String, default: null },
   req_body: { type: String },
   forecastStatus: { type: String },
   whichIsIn: { type: String },

@@ -1,6 +1,6 @@
 import { getRandomInRange, wait } from "./util.js"
 
-// const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000"
+// const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000/api"
 const BACKEND_URL = process.env.BACKEND_URL || "https://javiqueuelist.cloud/api"
 
 ;(async () => {
