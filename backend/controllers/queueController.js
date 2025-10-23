@@ -156,3 +156,18 @@ module.exports._delete = async (req, res) => {
     return res.status(504).json({ error: "true" })
   }
 }
+module.exports._deleteLimited = async (req, res) => {
+  try {
+    await queueModel
+      .find()
+      .sort({ createdAt: 1 }) // oldest first
+      .limit(50)
+      .then(async (docs) => {
+        const ids = docs.map((d) => d._id)
+        await queueModel.deleteMany({ _id: { $in: ids } })
+      })
+    return res.status(200).json({ success: "true" })
+  } catch (error) {
+    return res.status(504).json({ error: "true" })
+  }
+}

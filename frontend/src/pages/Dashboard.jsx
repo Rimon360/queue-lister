@@ -50,11 +50,23 @@ const Dashboard = () => {
       }
     }
   }
+  const handleDeleteLimited = async () => {
+    console.log("hi")
 
+    if (confirm("Are you sure?")) {
+      let result = await axios.post(BACKEND_URL + "/queue/delete-limited")
+      if (result.data.success) {
+        location.reload()
+      }
+    }
+  }
   return (
     <div className="p-6 max-w-fit mx-auto">
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-blue-800">Queue Dashboard</h1>
+        <button onClick={handleDeleteLimited} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+          Delete old 50
+        </button>
         <button onClick={(e) => location.reload()} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path
