@@ -71,8 +71,8 @@ module.exports.status = async (req, res) => {
   let addedTime = +new Date(queue.createdAt)
   let timeSpent = Date.now() - addedTime
   let maxTimeAllowcate = 5 * 60 * 1000 // 10 minute;
-  console.log('maxTimeAllowcate to call...');
-  if (queue.forecastStatus.toLowerCase() == "FirstInLine".toLowerCase() && timeSpent >= maxTimeAllowcate) {
+  console.log(queue);
+  if (queue&&queue.forecastStatus.toLowerCase() == "FirstInLine".toLowerCase() && timeSpent >= maxTimeAllowcate) {
     await queueModel.deleteOne({ req_url })
     return res.status(200).json([])
   }
