@@ -18,7 +18,7 @@ const Dashboard = () => {
         let queues = result.data
         setTotalCount(queues.length)
         setFilteredQueues(queues)
-        let v = getRandomInRange(10,10)
+        let v = getRandomInRange(10, 10)
         setRefreshTime(v)
         await wait(v)
       }
@@ -78,7 +78,7 @@ const Dashboard = () => {
         <table className="min-w-full table-auto">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Redirect Url</th> 
+              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Redirect Url</th>
               <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Left</th>
               <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Time</th>
