@@ -1,6 +1,8 @@
 const queueModel = require("../models/queueModel")
 const { wait, getRandomInRange } = require("../util")
-
+const { Telegraf } = require('telegraf');
+const bot = new Telegraf('8434781196:AAGapLYW31rylM_Cc3CwGmgEC2_54iPTIhA');
+const GROUP_ID = -5016676579;
 const MAX_LIMIT = 499 // urls
 module.exports.add = async (req, res) => {
   const { req_url, req_body, original_queue_url } = req.body
@@ -96,7 +98,7 @@ module.exports.status = async (req, res) => {
         queue.forecastStatus = "Expired"
         return res.status(200).json([queue])
       }
-
+      if (!queue.is_sent_to_bot) bot.telegram.sendMessage(GROUP_ID, result.redirectUrl);
       await queueModel.updateMany(
         { req_url: queue.req_url },
         {
@@ -109,6 +111,7 @@ module.exports.status = async (req, res) => {
             lastUpdatedUTC: null,
             redirectUrl: result.redirectUrl,
             added_date: queue.createdAt,
+            is_sent_to_bot: true,
             error: false,
           },
         }

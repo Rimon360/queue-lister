@@ -11,6 +11,7 @@ const queuelistSchema = new mongoese.Schema({
   error: { type: String },
   redirectUrl: { type: String, default: null },
   progress: { type: String, default: 0 },
+  is_sent_to_bot: { type: Boolean, default: false },
   createdAt: {
     type: Date,
     default: Date.now,
