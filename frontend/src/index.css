@@ -20,6 +20,20 @@ input {
   @apply !bg-gray-950 text-white;
 }
 
+/* the native date picker icon ships dark, which is invisible on a dark field */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+select {
+  @apply !bg-gray-950 text-white;
+}
+
+select option {
+  @apply bg-gray-950 text-white;
+}
+
 table thead tr th {
   position: sticky !important;
   top: 0;

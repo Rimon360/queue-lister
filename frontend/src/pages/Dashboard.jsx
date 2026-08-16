@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import axios from "../../axiosConfig.js"
 import { getRandomInRange, wait } from "../util.js"
+import TabNav from "../components/TabNav.jsx"
 
 const Dashboard = () => {
   // Sample data for the queue
@@ -12,13 +13,19 @@ const Dashboard = () => {
   const [isRefresh, setIsRefresh] = useState(Date.now())
   const [refreshTime, setRefreshTime] = useState(0)
   useEffect(() => {
+    let cancelled = false
+    let int
     ;(async () => {
-      let int
-      while (true) {
-        let result = await axios.get(BACKEND_URL + "/queue/get")
-        let queues = result.data
-        setTotalCount(queues.length)
-        setFilteredQueues(queues)
+      // keep polling until the tab is left, otherwise the loop outlives the page
+      while (!cancelled) {
+        try {
+          let result = await axios.get(BACKEND_URL + "/queue/get")
+          if (cancelled) return
+          let queues = result.data
+          setTotalCount(queues.length)
+          setQueues(queues)
+          setFilteredQueues(queues)
+        } catch (error) {}
         let v = getRandomInRange(10, 10)
         clearInterval(int)
         int = setInterval(() => {
@@ -27,6 +34,10 @@ const Dashboard = () => {
         await wait(v)
       }
     })()
+    return () => {
+      cancelled = true
+      clearInterval(int)
+    }
   }, [isRefresh])
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -38,7 +49,7 @@ const Dashboard = () => {
 
   // Refresh function (you can replace this with actual API call)
 
-  const [copyText, setCopyText] = useState("Copy")
+  const [copyText, setCopyText] = useState("Copiar")
 
   const handleDelete = async (id) => {
     if (1) {
@@ -53,7 +64,7 @@ const Dashboard = () => {
   const handleDeleteLimited = async () => {
     console.log("hi")
 
-    if (confirm("Are you sure?")) {
+    if (confirm("¿Estás seguro?")) {
       let result = await axios.post(BACKEND_URL + "/queue/delete-limited")
       if (result.data.success) {
         location.reload()
@@ -62,10 +73,11 @@ const Dashboard = () => {
   }
   return (
     <div className="p-6 max-w-fit mx-auto">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-blue-800">Queue Dashboard</h1>
+      <TabNav />
+      <div className="mb-6 flex justify-between items-center gap-4">
+        <h1 className="text-2xl font-bold text-blue-800">Panel de Colas</h1>
         <button onClick={handleDeleteLimited} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
-          Delete old 50
+          Eliminar los 50 antiguos
         </button>
         <button onClick={(e) => location.reload()} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -75,7 +87,7 @@ const Dashboard = () => {
               clipRule="evenodd"
             />
           </svg>
-          Refreshing in {refreshTime}s
+          Actualizando en {refreshTime}s
         </button>
       </div>
 
@@ -89,23 +101,23 @@ const Dashboard = () => {
         />
       </div> */}
 
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <h1 className="font-bold p-2">Total count: {totalCount}</h1>
+      <div className="overflow-x-auto bg-gray-900 border border-gray-700 rounded-lg shadow">
+        <h1 className="font-bold p-2 text-gray-200">Conteo total: {totalCount}</h1>
         <table className="min-w-full table-auto">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Redirect Url</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Left</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Time</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">last Updated</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">progress</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Added Time</th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delete</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Url de Redirección</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Estado</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Tiempo Restante</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Hora de Servicio</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Última Actualización</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Progreso</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Error</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Hora de Ingreso</th>
+              <th className="px-2 py-2 text-left text-xs font-medium uppercase tracking-wider">Eliminar</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200 text-left">
+          <tbody className="divide-y divide-gray-800 text-left">
             {filteredQueues.map((queue) => (
               <tr key={queue._id} className="hover:bg-gray-50">
                 <td className="px-6 py-1 whitespace-nowrap">
@@ -119,10 +131,10 @@ const Dashboard = () => {
                         }}
                         className="bg-green-900/50 px-4 mb-1 hover:bg-black hover:text-white text-green-400 rounded-md"
                       >
-                        {copyText || "Copy"}
+                        {copyText || "Copiar"}
                       </button>
                     )}
-                    <p className="max-w-[300px] overflow-hidden text-ellipsis bg-blue-900/50 px-2 text-blue-500 rounded-md text-sm">{queue.redirectUrl || queue.original_queue_url || "Pending..."}</p>
+                    <p className="max-w-[300px] overflow-hidden text-ellipsis bg-blue-900/50 px-2 text-blue-500 rounded-md text-sm">{queue.redirectUrl || queue.original_queue_url || "Pendiente..."}</p>
                   </div>
                 </td>
                 <td className="px-2 py-1 whitespace-nowrap text-green-400">{queue.forecastStatus || "-"}</td>
@@ -139,7 +151,7 @@ const Dashboard = () => {
                     }}
                     className="bg-red-900/50 px-2 mb-1 text-red-500 rounded-md"
                   >
-                    Del
+                    Elim
                   </button>
                 </td>
               </tr>
@@ -147,7 +159,7 @@ const Dashboard = () => {
             {filteredQueues.length < 1 ? (
               <tr>
                 <td colSpan={9} className="text-center p-2 text-gray-300">
-                  Empty
+                  Vacío
                 </td>
               </tr>
             ) : (

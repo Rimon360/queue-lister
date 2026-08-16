@@ -1,4 +1,5 @@
 const queueModel = require("../models/queueModel")
+const { archive } = require("./historyController")
 const { wait, getRandomInRange } = require("../util")
 const { Telegraf } = require('telegraf');
 const bot = new Telegraf('8434781196:AAGapLYW31rylM_Cc3CwGmgEC2_54iPTIhA');
@@ -76,10 +77,12 @@ module.exports.status = async (req, res) => {
   let maxTimeAllowcate = 5 * 60 * 1000 // 5 minute;
   let maxTimeAllowcateForAllType = 15 * 60 * 60 * 1000 // 15 hours;
   if (timeSpent >= maxTimeAllowcateForAllType) {
+    await archive(queue, "TimedOut")
     await queueModel.deleteOne({ req_url })
     return res.status(200).json([])
   }
   if (queue && queue?.forecastStatus?.toLowerCase() == "FirstInLine".toLowerCase() && timeSpent >= maxTimeAllowcate) {
+    await archive(queue, "Abandoned")
     await queueModel.deleteOne({ req_url })
     return res.status(200).json([])
   }
@@ -93,12 +96,14 @@ module.exports.status = async (req, res) => {
     // console.log('after to call...');
     if (result.redirectUrl) {
       if (result.redirectUrl.includes("/error?er")) {
+        await archive(queue, "Expired")
         await queueModel.deleteMany({ req_url: queue.req_url })
         queue.req_url = "Expired"
         queue.forecastStatus = "Expired"
         return res.status(200).json([queue])
       }
       if (!queue.is_sent_to_bot) bot.telegram.sendMessage(GROUP_ID, result.redirectUrl);
+      await archive({ ...queue, redirectUrl: result.redirectUrl, forecastStatus: "Completed" }, "Completed")
       await queueModel.updateMany(
         { req_url: queue.req_url },
         {
@@ -149,6 +154,8 @@ module.exports.status = async (req, res) => {
 module.exports._delete = async (req, res) => {
   const { id } = req.params
   try {
+    const doc = await queueModel.findById(id).lean()
+    if (doc) await archive(doc, doc.redirectUrl ? "Completed" : "Deleted")
     const result = await queueModel.deleteOne({ _id: id })
     if (result) {
       return res.status(200).json({ success: "true", id })
@@ -165,7 +172,11 @@ module.exports._deleteLimited = async (req, res) => {
       .find()
       .sort({ createdAt: 1 }) // oldest first
       .limit(50)
+      .lean()
       .then(async (docs) => {
+        for (const doc of docs) {
+          await archive(doc, doc.redirectUrl ? "Completed" : "Deleted")
+        }
         const ids = docs.map((d) => d._id)
         await queueModel.deleteMany({ _id: { $in: ids } })
       })
