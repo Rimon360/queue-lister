@@ -2,28 +2,33 @@ import { getRandomInRange, wait } from "./util.js"
 
 // const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000/api"
 const BACKEND_URL = process.env.BACKEND_URL || "https://javiqueuelist.cloud/api"
+processQueue()
+async function processQueue(queues, concurrency = 20) {
+  let index = 0
 
-;(async () => {
-  while (true) {
-    try {
-      let result = await fetch(BACKEND_URL + "/queue/get")
-      const queues = await result.json()
-      let startAt = Date.now()
-      let n = 0
-      if (queues.length == 0) await new Promise((rs) => setTimeout(rs, 2000))
-      for (const queue of queues) {
-        try {
-          let result = await fetch(BACKEND_URL + "/queue/status", { method: "POST", body: JSON.stringify({ req_url: queue.req_url }), headers: { "Content-Type": "application/json" } })
-          // await wait(getRandomInRange(0.05, 0.07))
-          // console.log('Done...', n++);
-        } catch (error) {
-          console.log(error)
-        }
+  async function worker() {
+    while (true) {
+      const i = index++
+
+      if (i >= queues.length) return
+
+      const queue = queues[i]
+
+      try {
+        await fetch(BACKEND_URL + "/queue/status", {
+          method: "POST",
+          body: JSON.stringify({
+            req_url: queue.req_url,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+      } catch (error) {
+        console.error("Failed:", queue.req_url, error)
       }
-      // console.log("total time ms:", Date.now() - startAt)
-
-      // let v = getRandomInRange(2, 4)
-      // await wait(v)
-    } catch (error) {}
+    }
   }
-})()
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, queues.length) }, worker))
+}
