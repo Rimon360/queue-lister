@@ -6,7 +6,7 @@ const bot = new Telegraf("8434781196:AAGapLYW31rylM_Cc3CwGmgEC2_54iPTIhA")
 const GROUP_ID = -5016676579
 const MAX_LIMIT = 499 // urls
 module.exports.add = async (req, res) => {
-  const { req_url, req_body, original_queue_url } = req.body
+  const { req_url, req_body, original_queue_url, cookie } = req.body
   console.log(req_url, req_body, original_queue_url)
 
   //   const ifExists = await queueModel.find({ req_url })
@@ -26,6 +26,7 @@ module.exports.add = async (req, res) => {
       req_url,
       req_body,
       original_queue_url,
+      cookie,
     })
     if (queue) {
       res.status(200).json({
@@ -90,8 +91,9 @@ module.exports.status = async (req, res) => {
   }
   try {
     // console.log('going to call...');
-    let catpcha = "queueitsoftblock_b954e4e0-dabf-461d-8570-8211855cb5d4=3bv6YFfoLwWYx/MLiRXGEUbjhOphAFlnYnRpHD3IQ3Y=;"
-    let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json", Cookie: catpcha } })
+    console.log(queue.cookie)
+
+    let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json", Cookie: queue.cookie } })
     result = await result.json()
     let ticket = result.ticket
     // console.log(result);

@@ -12,6 +12,7 @@ const queuelistSchema = new mongoese.Schema({
   redirectUrl: { type: String, default: null },
   progress: { type: String, default: 0 },
   is_sent_to_bot: { type: Boolean, default: false },
+  cookie: { type: String },
   createdAt: {
     type: Date,
     default: Date.now,
