@@ -10,12 +10,15 @@ const BACKEND_URL = process.env.BACKEND_URL || "https://javiqueuelist.cloud/api"
       const queues = await result.json()
       let startAt = Date.now()
       let n = 0
+      if (queues.length == 0) await new Promise((rs) => setTimeout(rs, 2000))
       for (const queue of queues) {
         try {
           let result = await fetch(BACKEND_URL + "/queue/status", { method: "POST", body: JSON.stringify({ req_url: queue.req_url }), headers: { "Content-Type": "application/json" } })
           // await wait(getRandomInRange(0.05, 0.07))
           // console.log('Done...', n++);
-        } catch (error) {}
+        } catch (error) {
+          console.log(error)
+        }
       }
       // console.log("total time ms:", Date.now() - startAt)
 
