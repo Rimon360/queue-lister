@@ -6,46 +6,46 @@ const bot = new Telegraf("8434781196:AAGapLYW31rylM_Cc3CwGmgEC2_54iPTIhA")
 const GROUP_ID = -5016676579
 const MAX_LIMIT = 499 // urls
 module.exports.add = async (req, res) => {
-  const { req_url, req_body, original_queue_url, cookie } = req.body
-
-  // const ifExists = await queueModel.find({ req_url })
-  // if (ifExists.length > 0) {
-  //   return res.status(400).json({
-  //     message: "Already exists",
-  //     error: true,
-  //   })
-  // }
+  const {
+    req_url,
+    req_body,
+    original_queue_url,
+    cookie
+  } = req.body
 
   try {
     if (!cookie) {
-      return res.status(200).json({ message: "Cookie must needed" })
+      return res.status(400).json({
+        message: "Cookie is required",
+        error: true
+      })
     }
-    
-    const result = await queueModel.find()
-    if (result.length > MAX_LIMIT) {
-      res.status(200).json({ message: "waiting period..." })
-      return
+
+    const count = await queueModel.countDocuments()
+
+    if (count >= MAX_LIMIT) {
+      return res.status(429).json({
+        message: "Waiting period..."
+      })
     }
-    const queue = await queueModel.create({
+
+    await queueModel.create({
       req_url,
       req_body,
       original_queue_url,
-      cookie,
+      cookie
     })
-    if (queue) {
-      res.status(200).json({
-        message: "Queue created successfully",
-      })
-      return
-    }
+
+    return res.status(201).json({
+      message: "Queue created successfully"
+    })
+
+  } catch (error) {
+    console.error("Queue creation error:", error)
+
     return res.status(503).json({
       message: "Server error, unable to add",
-      error: true,
-    })
-  } catch (error) {
-    res.status(503).json({
-      message: "Server error, unable to add",
-      error: true,
+      error: true
     })
   }
 }
