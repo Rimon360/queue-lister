@@ -20,8 +20,7 @@ backend/*.sln
 backend/*.sw?
 
 t.js
-doc.md
-chrome_extension
+doc.md 
 
 fontend/logs
 fontend/*.log
