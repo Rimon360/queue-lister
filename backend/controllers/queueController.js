@@ -155,7 +155,7 @@ module.exports.status = async (req, res) => {
       queueInfo.push(queue)
     }
   } catch (error) {
-    // console.log(error);
+    console.log(error);
 
     return res.status(200).json([])
   }
