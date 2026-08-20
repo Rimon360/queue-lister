@@ -1,14 +1,14 @@
 const queueModel = require("../models/queueModel")
 const { archive } = require("./historyController")
 const { wait, getRandomInRange } = require("../util")
-const { Telegraf } = require('telegraf');
-const bot = new Telegraf('8434781196:AAGapLYW31rylM_Cc3CwGmgEC2_54iPTIhA');
-const GROUP_ID = -5016676579;
+const { Telegraf } = require("telegraf")
+const bot = new Telegraf("8434781196:AAGapLYW31rylM_Cc3CwGmgEC2_54iPTIhA")
+const GROUP_ID = -5016676579
 const MAX_LIMIT = 499 // urls
 module.exports.add = async (req, res) => {
   const { req_url, req_body, original_queue_url } = req.body
-  console.log(req_url, req_body, original_queue_url);
-  
+  console.log(req_url, req_body, original_queue_url)
+
   //   const ifExists = await queueModel.find({ req_url })
   //   if (ifExists.length > 0) {
   //     return res.status(400).json({
@@ -90,8 +90,8 @@ module.exports.status = async (req, res) => {
   }
   try {
     // console.log('going to call...');
-
-    let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json" } })
+    let catpcha = "queueitsoftblock_b954e4e0-dabf-461d-8570-8211855cb5d4=3bv6YFfoLwWYx/MLiRXGEUbjhOphAFlnYnRpHD3IQ3Y=;"
+    let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json", Cookie: catpcha } })
     result = await result.json()
     let ticket = result.ticket
     // console.log(result);
@@ -111,7 +111,7 @@ module.exports.status = async (req, res) => {
         queue.forecastStatus = "Blocked"
         return res.status(200).json([queue])
       }
-      if (!queue.is_sent_to_bot) bot.telegram.sendMessage(GROUP_ID, result.redirectUrl);
+      if (!queue.is_sent_to_bot) bot.telegram.sendMessage(GROUP_ID, result.redirectUrl)
       await archive({ ...queue, redirectUrl: result.redirectUrl, forecastStatus: "Completed" }, "Completed")
       await queueModel.updateMany(
         { req_url: queue.req_url },
@@ -128,7 +128,7 @@ module.exports.status = async (req, res) => {
             is_sent_to_bot: true,
             error: false,
           },
-        }
+        },
       )
       queue = await queueModel.findOne({ req_url }).sort({ progress: 1 })
       queueInfo.push(queue)
@@ -147,7 +147,7 @@ module.exports.status = async (req, res) => {
             added_date: queue.createdAt,
             error: false,
           },
-        }
+        },
       )
       queue = await queueModel.findOne({ req_url }).sort({ progress: 1 })
       queueInfo.push(queue)
