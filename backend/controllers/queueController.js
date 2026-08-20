@@ -106,8 +106,8 @@ module.exports.status = async (req, res) => {
       }
       if (result.redirectUrl.includes("/softblock")) {
         await archive(queue, "Softblock")
-        await queueModel.deleteMany({ req_url: queue.req_url })
-        queue.req_url = "Blocked"
+        // await queueModel.deleteMany({ req_url: queue.req_url })
+        // queue.req_url = "Blocked"
         queue.forecastStatus = "Blocked"
         return res.status(200).json([queue])
       }
