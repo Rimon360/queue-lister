@@ -1,22 +1,23 @@
 const queueModel = require("../models/queueModel")
 const { archive } = require("./historyController")
-const { wait, getRandomInRange } = require("../util")
+const { wait, getRandomInRange, parseCookie, getCookieNames, removeCookieByName } = require("../util")
 const { Telegraf } = require("telegraf")
 const bot = new Telegraf("8434781196:AAGapLYW31rylM_Cc3CwGmgEC2_54iPTIhA")
 const GROUP_ID = -5016676579
 const MAX_LIMIT = 499 // urls
 module.exports.add = async (req, res) => {
   const { req_url, req_body, original_queue_url, cookie } = req.body
-  console.log(req_url, req_body, original_queue_url)
 
-  //   const ifExists = await queueModel.find({ req_url })
-  //   if (ifExists.length > 0) {
-  //     return res.status(400).json({
-  //       message: "Already exists",
-  //       error: true,
-  //     })
-  //   }
+  // const ifExists = await queueModel.find({ req_url })
+  // if (ifExists.length > 0) {
+  //   return res.status(400).json({
+  //     message: "Already exists",
+  //     error: true,
+  //   })
+  // }
+
   try {
+    if (!cookie) res.status(200).json({ message: "Cookie must needed" })
     const result = await queueModel.find()
     if (result.length > MAX_LIMIT) {
       res.status(200).json({ message: "waiting period..." })
@@ -34,7 +35,7 @@ module.exports.add = async (req, res) => {
       })
       return
     }
-    res.status(503).json({
+    return res.status(503).json({
       message: "Server error, unable to add",
       error: true,
     })
@@ -75,10 +76,12 @@ module.exports.status = async (req, res) => {
   let queueInfo = []
   // console.log('queueModel to call...');
   let queue = await queueModel.findOne({ req_url }).sort({ progress: 1 }).lean()
+  let cookie = queue.cookie
   let addedTime = +new Date(queue.createdAt)
   let timeSpent = Date.now() - addedTime
   let maxTimeAllowcate = 5 * 60 * 1000 // 5 minute;
   let maxTimeAllowcateForAllType = 15 * 60 * 60 * 1000 // 15 hours;
+  let additionalCookie = queue.additionalCookie
   if (timeSpent >= maxTimeAllowcateForAllType) {
     await archive(queue, "TimedOut")
     await queueModel.deleteOne({ req_url })
@@ -91,12 +94,35 @@ module.exports.status = async (req, res) => {
   }
   try {
     // console.log('going to call...');
-    console.log(queue.cookie)
+    let updatedCookieNameList = getCookieNames(additionalCookie)
+    // cookie = removeCookieByName(cookie, updatedCookieNameList)
+    let result = await fetch(queue.req_url, {
+      method: "POST", 
+      headers: {
+        accept: "application/json, text/javascript, */*; q=0.01",
+        "accept-language": "en-US,en;q=0.7",
+        "content-type": "application/json",
+        priority: "u=1, i",
+        "sec-ch-ua": '"Not=A?Brand";v="99", "Brave";v="151", "Chromium";v="151"',
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": '"Windows"',
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "sec-gpc": "1",
+        "x-requested-with": "XMLHttpRequest",
+        Cookie: cookie,
+      },
+      body: queue.req_body,
+      mode: "cors",
+    })
 
-    let result = await fetch(queue.req_url, { method: "POST", body: queue.req_body, headers: { "content-type": "application/json", Cookie: queue.cookie } })
+    let headers = result.headers
+    let headerCookies = headers.get("set-cookie")
+    let updatedCookies = headerCookies ? parseCookie(headerCookies) : null
+
     result = await result.json()
-    let ticket = result.ticket
-    // console.log(result);
+    let ticket = result.ticket  
     // console.log('after to call...');
     if (result.redirectUrl) {
       if (result.redirectUrl.includes("/error?er")) {
@@ -107,28 +133,36 @@ module.exports.status = async (req, res) => {
         return res.status(200).json([queue])
       }
       if (result.redirectUrl.includes("/softblock")) {
-        await archive(queue, "Softblock")
-        // await queueModel.deleteMany({ req_url: queue.req_url })
-        // queue.req_url = "Blocked"
+        await archive(queue, "Blocked")
         queue.forecastStatus = "Blocked"
+        await queueModel.updateMany(
+          { req_url: queue.req_url },
+          {
+            $set: {
+              forecastStatus: "Blocked",
+            },
+          },
+        )
         return res.status(200).json([queue])
       }
       if (!queue.is_sent_to_bot) bot.telegram.sendMessage(GROUP_ID, result.redirectUrl)
+
       await archive({ ...queue, redirectUrl: result.redirectUrl, forecastStatus: "Completed" }, "Completed")
       await queueModel.updateMany(
         { req_url: queue.req_url },
         {
           $set: {
             req_url: queue.req_url,
-            forecastStatus: "Completed",
+            forecastStatus: result.redirectUrl.includes("/softblock") ? "Blocked" : "Completed",
             progress: null,
             whichIsIn: null,
             expectedServiceTime: null,
             lastUpdatedUTC: null,
-            redirectUrl: result.redirectUrl,
+            redirectUrl: result.redirectUrl.includes("/softblock") ? queue.original_queue_url : result.redirectUrl,
             added_date: queue.createdAt,
             is_sent_to_bot: true,
             error: false,
+            additionalCookie: updatedCookies,
           },
         },
       )
@@ -147,6 +181,7 @@ module.exports.status = async (req, res) => {
             lastUpdatedUTC: ticket.lastUpdatedUTC,
             redirectUrl: null,
             added_date: queue.createdAt,
+            additionalCookie: updatedCookies,
             error: false,
           },
         },
@@ -154,9 +189,7 @@ module.exports.status = async (req, res) => {
       queue = await queueModel.findOne({ req_url }).sort({ progress: 1 })
       queueInfo.push(queue)
     }
-  } catch (error) {
-    console.log(error);
-
+  } catch (error) { 
     return res.status(200).json([])
   }
 
