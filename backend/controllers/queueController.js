@@ -17,7 +17,10 @@ module.exports.add = async (req, res) => {
   // }
 
   try {
-    if (!cookie) res.status(200).json({ message: "Cookie must needed" })
+    if (!cookie) {
+      return res.status(200).json({ message: "Cookie must needed" })
+    }
+    
     const result = await queueModel.find()
     if (result.length > MAX_LIMIT) {
       res.status(200).json({ message: "waiting period..." })
@@ -97,7 +100,7 @@ module.exports.status = async (req, res) => {
     let updatedCookieNameList = getCookieNames(additionalCookie)
     // cookie = removeCookieByName(cookie, updatedCookieNameList)
     let result = await fetch(queue.req_url, {
-      method: "POST", 
+      method: "POST",
       headers: {
         accept: "application/json, text/javascript, */*; q=0.01",
         "accept-language": "en-US,en;q=0.7",
@@ -122,7 +125,7 @@ module.exports.status = async (req, res) => {
     let updatedCookies = headerCookies ? parseCookie(headerCookies) : null
 
     result = await result.json()
-    let ticket = result.ticket  
+    let ticket = result.ticket
     // console.log('after to call...');
     if (result.redirectUrl) {
       if (result.redirectUrl.includes("/error?er")) {
@@ -189,7 +192,7 @@ module.exports.status = async (req, res) => {
       queue = await queueModel.findOne({ req_url }).sort({ progress: 1 })
       queueInfo.push(queue)
     }
-  } catch (error) { 
+  } catch (error) {
     return res.status(200).json([])
   }
 
